@@ -9,6 +9,9 @@ import knex from "knex";
 import { isEmail, isStrongPassword } from "validator";
 
 import knexConfig from "../knexfile";
+
+// Routes
+import profileRoutes from "./routes/profile-routes";
 import userRoutes from "./routes/user-routes";
 
 // Constants
@@ -25,6 +28,7 @@ const db = knex(knexConfig);
 // endpoints for user, outfits, clothes (tags if possible)?
 
 app.use("/user", userRoutes);
+app.use("/profile", profileRoutes);
 
 app.post("/signup", async (req, res) => {
     console.log(req.body);
@@ -75,7 +79,7 @@ app.post("/login", async (req, res) => {
     try {
         // Retrieve user from the database
         const user = await db("user")
-            .select("id", "username", "password")
+            .select("id", "username", "password", "email")
             .where({ email })
             .first();
 

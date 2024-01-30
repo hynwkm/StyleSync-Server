@@ -15,7 +15,10 @@ export const getAllUsers = async (_req: Request, res: Response) => {
             "weight",
             "rating",
             "budget",
-            "profile_pic"
+            "profile_pic",
+            "dob",
+            "gender",
+            "bio"
         );
         res.status(200).json(data);
     } catch (error) {
@@ -23,12 +26,9 @@ export const getAllUsers = async (_req: Request, res: Response) => {
     }
 };
 
-export const getProfile = async (
-    req: Request & { decoded?: { username: string; email: string } },
-    res: Response
-) => {
+export const getOneUser = async (req: Request, res: Response) => {
     try {
-        const { email } = req.decoded ?? {};
+        const userId = req.params;
         const data = await db("user")
             .select(
                 "id",
@@ -38,28 +38,34 @@ export const getProfile = async (
                 "weight",
                 "rating",
                 "budget",
-                "profile_pic"
+                "profile_pic",
+                "dob",
+                "gender",
+                "bio"
             )
-            .where({ email });
+            .where({ id: userId });
         res.status(200).json(data);
     } catch (error) {
-        res.status(500).send("Server error in getting profile");
+        res.status(500).send("Server error in getting user");
     }
 };
 
-export const editProfile = async (
-    req: Request & { decoded?: { username: string; email: string } },
-    res: Response
-) => {
+export const getAllOutfits = async (req: Request, res: Response) => {
     try {
-        const { email } = req.decoded ?? {};
-        const { username, height, weight, rating, budget, profile_pic } =
-            req.body;
+        const userId = req.params;
         const data = await db("user")
-            .where({ email })
-            .update({ username, height, weight, rating, budget, profile_pic });
+            .join("outfit", { id: `outfit.id` })
+            .select(
+                "outfit.id",
+                "username",
+                "email",
+                "height",
+                "weight",
+                "rating",
+                "budget",
+                "profile_pic"
+            )
+            .where({ id: userId });
         res.status(200).json(data);
-    } catch (error) {
-        res.status(500).send("Server error in getting profile");
-    }
+    } catch (error) {}
 };
