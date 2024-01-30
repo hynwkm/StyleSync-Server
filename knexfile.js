@@ -1,4 +1,6 @@
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 module.exports = {
     client: "mysql2",
@@ -8,5 +10,10 @@ module.exports = {
         user: process.env.DB_LOCAL_USER,
         password: process.env.DB_LOCAL_PASSWORD,
         charset: "utf8",
+    },
+    migrations: {
+        extension: "ts",
+        tableName: "stylesync",
+        directory: "./migrations",
     },
 };
