@@ -1,9 +1,39 @@
 import { Request, Response } from "express";
 import knex from "knex";
+import OpenAI from "openai";
 
 import knexConfig from "../../knexfile";
 
 const db = knex(knexConfig);
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function identifyClothing(url: string): Promise<void> {
+    const response = await openai.chat.completions.create({
+        model: "gpt-4-vision-preview",
+        messages: [
+            {
+                role: "user",
+                content: [
+                    {
+                        type: "text",
+                        text: "Identify and describe the individual articles of clothing in this image, including colors and styles.",
+                    },
+                    {
+                        type: "image_url",
+                        image_url: {
+                            url,
+                            detail: "low",
+                        },
+                    },
+                ],
+            },
+        ],
+    });
+    console.log(response);
+}
 
 export const getProfile = async (
     req: Request & { decoded?: { username: string; email: string } },
@@ -75,11 +105,11 @@ export const getOutfits = async (
             .where({ email });
         res.status(200).json(data);
     } catch (error) {
-        console.error(error);
         res.status(500).send("Server error in getting outfits");
     }
 };
 
+// openai needs a dollar in balance
 export const uploadOutfit = async (
     req: Request & { decoded?: { username: string; email: string } },
     res: Response
@@ -93,9 +123,11 @@ export const uploadOutfit = async (
             user_id: user.id,
             outfit_pic_link,
         });
+
+        // identifyClothing(outfit_pic_link);
+
         res.status(200).json(data);
     } catch (error) {
-        console.error(error);
         res.status(500).send("Server error in getting outfits");
     }
 };
@@ -114,7 +146,6 @@ export const editOutfit = async (
         });
         res.status(200).json(data);
     } catch (error) {
-        console.error(error);
         res.status(500).send("Server error in getting outfits");
     }
 };
@@ -137,7 +168,6 @@ export const deleteOutfit = async (
 
         res.status(200).send("Outfit deleted Successfully");
     } catch (error) {
-        console.error(error);
         res.status(500).send("Server error in getting outfits");
     }
 };
