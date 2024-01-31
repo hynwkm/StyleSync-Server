@@ -31,7 +31,6 @@ app.use("/user", userRoutes);
 app.use("/profile", profileRoutes);
 
 app.post("/signup", async (req, res) => {
-    console.log(req.body);
     try {
         const { username, password, email } = req.body;
 
@@ -68,8 +67,7 @@ app.post("/signup", async (req, res) => {
 
         res.status(201).json({ username });
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Internal Server Error during sign up");
     }
 });
 
@@ -95,8 +93,7 @@ app.post("/login", async (req, res) => {
         );
         res.status(201).json({ token });
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Internal Server Error during login");
     }
 });
 
