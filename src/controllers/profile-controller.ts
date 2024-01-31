@@ -168,6 +168,7 @@ export const deleteOutfit = async (
 
         res.status(200).send("Outfit deleted Successfully");
     } catch (error) {
+        console.error(error);
         res.status(500).send("Server error in getting outfits");
     }
 };
