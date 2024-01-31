@@ -11,45 +11,56 @@ function calculateAgeDifference(dob1: string, dob2: string): number {
     return Math.abs(age1 - age2);
 }
 
-// Function to calculate similarity between two users
 function calculateSimilarity(user1: User, user2: User): number {
-    const averageHeight = 165; // Average height in cm
-    const averageWeight = 62; // Average weight in kg
+    const maxAgeDifference = 50;
+    const maxHeightDifference = 50;
+    const maxWeightDifference = 50;
+    // Adjusted maximum budget difference for a single outfit
+    const maxBudgetDifference = 200;
 
-    let totalWeight = 0;
-    let accumulatedScore = 0;
+    let dobScore = 0,
+        heightScore = 0,
+        weightScore = 0,
+        budgetScore = 0;
+    let activeWeights = 0;
 
-    const dobWeight = 0.3;
+    // Date of Birth Score
     if (user1.dob && user2.dob) {
-        const ageGap = calculateAgeDifference(user1.dob, user2.dob);
-        accumulatedScore += dobWeight * (1 / (1 + ageGap));
-    } else {
-        accumulatedScore += dobWeight * 0.5; // Default penalty for missing DOB
-    }
-    totalWeight += dobWeight;
-
-    const heightWeight = 0.2;
-    const user1Height = user1.height || averageHeight;
-    const user2Height = user2.height || averageHeight;
-    const heightDifference = Math.abs(user1Height - user2Height) / 30;
-    accumulatedScore += heightWeight * (1 - heightDifference);
-    totalWeight += heightWeight;
-
-    const weightWeight = 0.2;
-    const user1Weight = user1.weight || averageWeight;
-    const user2Weight = user2.weight || averageWeight;
-    const weightDifference = Math.abs(user1Weight - user2Weight) / 20.0;
-    accumulatedScore += weightWeight * (1 - weightDifference);
-    totalWeight += weightWeight;
-
-    if (user1.budget && user2.budget) {
-        const budgetWeight = 0.3;
-        const budgetDifference = Math.abs(user1.budget - user2.budget) / 50.0;
-        accumulatedScore += budgetWeight * (1 - budgetDifference);
-        totalWeight += budgetWeight;
+        const ageDifference = calculateAgeDifference(user1.dob, user2.dob);
+        dobScore = Math.max(1 - ageDifference / maxAgeDifference, 0) * 0.27;
+        activeWeights += 0.27;
     }
 
-    return totalWeight > 0 ? accumulatedScore / totalWeight : 0;
+    // Height Score
+    if (user1.height != null && user2.height != null) {
+        const heightDifference = Math.abs(user1.height - user2.height);
+        heightScore =
+            Math.max(1 - heightDifference / maxHeightDifference, 0) * 0.23;
+        activeWeights += 0.23;
+    }
+
+    // Weight Score
+    if (user1.weight != null && user2.weight != null) {
+        const weightDifference = Math.abs(user1.weight - user2.weight);
+        weightScore =
+            Math.max(1 - weightDifference / maxWeightDifference, 0) * 0.25;
+        activeWeights += 0.25;
+    }
+
+    // Budget Score
+    if (user1.budget != null && user2.budget != null) {
+        const budgetDifference = Math.abs(user1.budget - user2.budget);
+        budgetScore =
+            Math.max(1 - (budgetDifference / maxBudgetDifference) ** 2, 0) *
+            0.25;
+        activeWeights += 0.25;
+    }
+
+    // Calculating the total score
+    let totalScore = dobScore + heightScore + weightScore + budgetScore;
+
+    // Normalizing the total score to a 0-100 scale
+    return activeWeights > 0 ? (totalScore / activeWeights) * 100 : 0;
 }
 
 export default function findSimilarUsers(

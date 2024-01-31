@@ -87,23 +87,25 @@ export const getAllUsersSorted = async (
             .where({ email })
             .first();
 
-        const allUsers = await db("user").select(
-            "id",
-            "username",
-            "email",
-            "height",
-            "weight",
-            "rating",
-            "budget",
-            "profile_pic",
-            "dob",
-            "gender",
-            "bio"
-        );
+        const allUsers = await db("user")
+            .select(
+                "id",
+                "username",
+                "email",
+                "height",
+                "weight",
+                "rating",
+                "budget",
+                "profile_pic",
+                "dob",
+                "gender",
+                "bio"
+            )
+            .where({ gender: loggedInUser.gender });
 
         const sortedUsers = findSimilarUsers(loggedInUser, allUsers);
 
-        res.status(200).json(sortedUsers);
+        res.status(200).json(sortedUsers.slice(1));
     } catch (error) {
         res.status(500).send("Server error in getting sorted users");
     }
