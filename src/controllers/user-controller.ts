@@ -9,19 +9,21 @@ const db = knex(knexConfig);
 
 export const getAllUsers = async (_req: Request, res: Response) => {
     try {
-        const data = await db("user").select(
-            "id",
-            "username",
-            "email",
-            "height",
-            "weight",
-            "rating",
-            "budget",
-            "profile_pic",
-            "dob",
-            "gender",
-            "bio"
-        );
+        const data = await db("user")
+            .select(
+                "id",
+                "username",
+                "email",
+                "height",
+                "weight",
+                "rating",
+                "budget",
+                "profile_pic",
+                "dob",
+                "gender",
+                "bio"
+            )
+            .where({ profile_visibility: 1 });
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send("Server error in getting users");
@@ -87,7 +89,7 @@ export const getAllUsersSorted = async (
             .where({ email })
             .first();
 
-        const allUsers = await db("user")
+        let allUsers = await db("user")
             .select(
                 "id",
                 "username",
@@ -101,11 +103,19 @@ export const getAllUsersSorted = async (
                 "gender",
                 "bio"
             )
-            .where({ gender: loggedInUser.gender });
-
-        const sortedUsers = findSimilarUsers(loggedInUser, allUsers);
-
-        res.status(200).json(sortedUsers.slice(1));
+            .where({ profile_visibility: 1 });
+        if (loggedInUser.gender !== null) {
+            if (loggedInUser.gender) {
+                allUsers = allUsers.filter(
+                    (user) => user.gender === loggedInUser.gender
+                );
+            }
+        }
+        let sortedUsers = findSimilarUsers(loggedInUser, allUsers);
+        sortedUsers = sortedUsers.filter(
+            (person) => person[0].id !== loggedInUser.id
+        );
+        res.status(200).json(sortedUsers);
     } catch (error) {
         res.status(500).send("Server error in getting sorted users");
     }
