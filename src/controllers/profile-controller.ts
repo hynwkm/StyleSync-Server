@@ -86,6 +86,7 @@ export const editProfile = async (
             dob,
             gender,
             bio,
+            profile_visibility,
         } = req.body;
         const formData = new FormData();
         formData.append("key", IMG_API_KEY as string);
@@ -102,20 +103,22 @@ export const editProfile = async (
                 ...formData.getHeaders(),
             },
         });
-        console.log(response);
+        const image_url = response.data.image.url;
 
-        // const data = await db("user").where({ email }).update({
-        //     username,
-        //     height,
-        //     weight,
-        //     rating,
-        //     budget,
-        //     profile_pic,
-        //     dob,
-        //     gender,
-        //     bio,
-        // });
-        // res.status(200).json(data);
+        await db("user").where({ email }).update({
+            username,
+            height,
+            weight,
+            rating,
+            budget,
+            profile_pic: image_url,
+            dob,
+            gender,
+            bio,
+            profile_visibility,
+        });
+        const updatedUser = await db("user").where({ email }).first();
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.log(error);
         res.status(500).send("Server error in getting profile");

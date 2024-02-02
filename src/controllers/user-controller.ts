@@ -9,19 +9,21 @@ const db = knex(knexConfig);
 
 export const getAllUsers = async (_req: Request, res: Response) => {
     try {
-        const data = await db("user").select(
-            "id",
-            "username",
-            "email",
-            "height",
-            "weight",
-            "rating",
-            "budget",
-            "profile_pic",
-            "dob",
-            "gender",
-            "bio"
-        );
+        const data = await db("user")
+            .select(
+                "id",
+                "username",
+                "email",
+                "height",
+                "weight",
+                "rating",
+                "budget",
+                "profile_pic",
+                "dob",
+                "gender",
+                "bio"
+            )
+            .where({ profile_visibility: 1 });
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send("Server error in getting users");
@@ -87,19 +89,21 @@ export const getAllUsersSorted = async (
             .where({ email })
             .first();
 
-        let allUsers = await db("user").select(
-            "id",
-            "username",
-            "email",
-            "height",
-            "weight",
-            "rating",
-            "budget",
-            "profile_pic",
-            "dob",
-            "gender",
-            "bio"
-        );
+        let allUsers = await db("user")
+            .select(
+                "id",
+                "username",
+                "email",
+                "height",
+                "weight",
+                "rating",
+                "budget",
+                "profile_pic",
+                "dob",
+                "gender",
+                "bio"
+            )
+            .where({ profile_visibility: 1 });
         if (loggedInUser.gender !== null) {
             if (loggedInUser.gender) {
                 allUsers = allUsers.filter(
