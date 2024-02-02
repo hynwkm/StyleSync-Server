@@ -20,17 +20,19 @@ const saltRounds = 10;
 // Middleware
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.static("./data/public"));
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
 
 // Initialize knex using your configuration
 const db = knex(knexConfig);
 
 // endpoints for user, outfits, clothes (tags if possible)?
 
-app.use("/user", userRoutes);
-app.use("/profile", profileRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/profile", profileRoutes);
 
-app.post("/signup", async (req, res) => {
+app.post("/api/signup", async (req, res) => {
     try {
         const { username, password, email } = req.body;
 
@@ -64,16 +66,19 @@ app.post("/signup", async (req, res) => {
 
         // Insert user into the database
         await db("user").insert({ username, password: hashedPassword, email });
-
-        res.status(201).json({ username });
+        const token = jwt.sign(
+            { email, username },
+            process.env.SECRET_KEY ??
+                "4217a82f82f0c3133dfc9557eb01171452f569ac3ac418956a2de8d9ea977857"
+        );
+        res.status(201).json({ token });
     } catch (error) {
         res.status(500).send("Internal Server Error during sign up");
     }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
-
     try {
         // Retrieve user from the database
         const user = await db("user")
@@ -93,6 +98,7 @@ app.post("/login", async (req, res) => {
         );
         res.status(201).json({ token });
     } catch (error) {
+        console.log(error);
         res.status(500).send("Internal Server Error during login");
     }
 });

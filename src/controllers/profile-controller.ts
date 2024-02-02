@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
+import FormData from "form-data";
 import knex from "knex";
 import OpenAI from "openai";
 
+import axios from "axios";
 import knexConfig from "../../knexfile";
 
 const db = knex(knexConfig);
@@ -9,6 +11,10 @@ const db = knex(knexConfig);
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+const IMG_API_URL: string =
+    process.env.IMG_API_URL || "https://freeimage.host/api/1/upload";
+const IMG_API_KEY: string =
+    process.env.IMG_API_KEY || "6d207e02198a847aa98d0a2a901485a5";
 
 async function identifyClothing(url: string): Promise<void> {
     const response = await openai.chat.completions.create({
@@ -50,9 +56,14 @@ export const getProfile = async (
                 "weight",
                 "rating",
                 "budget",
-                "profile_pic"
+                "profile_pic",
+                "dob",
+                "gender",
+                "bio",
+                "profile_visibility"
             )
-            .where({ email });
+            .where({ email })
+            .first();
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send("Server error in getting profile");
@@ -76,19 +87,37 @@ export const editProfile = async (
             gender,
             bio,
         } = req.body;
-        const data = await db("user").where({ email }).update({
-            username,
-            height,
-            weight,
-            rating,
-            budget,
-            profile_pic,
-            dob,
-            gender,
-            bio,
+        const formData = new FormData();
+        formData.append("key", IMG_API_KEY as string);
+        formData.append("action", "upload");
+        const base64ImageContent = profile_pic.replace(
+            /^data:image\/\w+;base64,/,
+            ""
+        );
+        formData.append("source", base64ImageContent);
+        formData.append("format", "json");
+
+        const response = await axios.post(IMG_API_URL, formData, {
+            headers: {
+                ...formData.getHeaders(),
+            },
         });
-        res.status(200).json(data);
+        console.log(response);
+
+        // const data = await db("user").where({ email }).update({
+        //     username,
+        //     height,
+        //     weight,
+        //     rating,
+        //     budget,
+        //     profile_pic,
+        //     dob,
+        //     gender,
+        //     bio,
+        // });
+        // res.status(200).json(data);
     } catch (error) {
+        console.log(error);
         res.status(500).send("Server error in getting profile");
     }
 };
@@ -124,7 +153,7 @@ export const uploadOutfit = async (
             outfit_pic_link,
         });
 
-        // identifyClothing(outfit_pic_link);
+        identifyClothing(outfit_pic_link);
 
         res.status(200).json(data);
     } catch (error) {
