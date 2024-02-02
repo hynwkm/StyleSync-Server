@@ -117,6 +117,12 @@ export const editProfile = async (
             bio,
             profile_visibility,
         });
+        const userId = await db("user").select("id").where({ email }).first();
+        await db("outfit").insert({
+            user_id: userId,
+            outfit_pic_link: image_url,
+        });
+
         const updatedUser = await db("user").where({ email }).first();
         res.status(200).json(updatedUser);
     } catch (error) {

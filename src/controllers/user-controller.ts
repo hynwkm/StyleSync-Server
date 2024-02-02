@@ -36,8 +36,9 @@ export const getOneUser = async (req: Request, res: Response) => {
         const data = await db("user")
             .select(
                 "id",
-                "username",
                 "email",
+                "profile_visibility",
+                "username",
                 "height",
                 "weight",
                 "rating",
@@ -47,7 +48,8 @@ export const getOneUser = async (req: Request, res: Response) => {
                 "gender",
                 "bio"
             )
-            .where({ id: userId });
+            .where({ id: userId })
+            .first();
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send(error);
