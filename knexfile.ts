@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-module.exports = {
+const knexConfig = {
     client: "mysql2",
     connection: {
         host: process.env.DB_HOST,
@@ -17,3 +17,5 @@ module.exports = {
         directory: "./migrations",
     },
 };
+
+export default knexConfig;
