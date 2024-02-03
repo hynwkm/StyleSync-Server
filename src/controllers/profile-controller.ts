@@ -20,12 +20,17 @@ async function identifyClothing(url: string): Promise<void> {
     const response = await openai.chat.completions.create({
         model: "gpt-4-vision-preview",
         messages: [
+            // {
+            //     role: "system",
+            //     content:
+            //         "List each visible article of clothing by its descriptive name only, suitable as a search term.",
+            // },
             {
                 role: "user",
                 content: [
                     {
                         type: "text",
-                        text: "Identify and describe the individual articles of clothing in this image, including colors and styles.",
+                        text: "Name each clothing item visible, one by one.",
                     },
                     {
                         type: "image_url",
@@ -38,7 +43,7 @@ async function identifyClothing(url: string): Promise<void> {
             },
         ],
     });
-    console.log(response);
+    console.log(response.choices[0].message);
 }
 
 export const getProfile = async (
@@ -88,41 +93,67 @@ export const editProfile = async (
             bio,
             profile_visibility,
         } = req.body;
-        const formData = new FormData();
-        formData.append("key", IMG_API_KEY as string);
-        formData.append("action", "upload");
-        const base64ImageContent = profile_pic.replace(
-            /^data:image\/\w+;base64,/,
-            ""
-        );
-        formData.append("source", base64ImageContent);
-        formData.append("format", "json");
+        if (profile_pic) {
+            const formData = new FormData();
+            formData.append("key", IMG_API_KEY as string);
+            formData.append("action", "upload");
+            const base64ImageContent = profile_pic.replace(
+                /^data:image\/\w+;base64,/,
+                ""
+            );
+            formData.append("source", base64ImageContent);
+            formData.append("format", "json");
+            const response = await axios.post(IMG_API_URL, formData, {
+                headers: {
+                    ...formData.getHeaders(),
+                },
+            });
+            const image_url = response.data.image.url;
+            const previousImage = await db("user")
+                .select("profile_pic")
+                .where({ email })
+                .first();
 
-        const response = await axios.post(IMG_API_URL, formData, {
-            headers: {
-                ...formData.getHeaders(),
-            },
-        });
-        const image_url = response.data.image.url;
+            await db("user")
+                .where({ email })
+                .update({
+                    username,
+                    height,
+                    weight,
+                    rating,
+                    budget,
+                    profile_pic: image_url,
+                    dob: new Date(dob).toLocaleDateString("en-CA", {
+                        // Using Canadian locale as an example to get YYYY-MM-DD format
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                    }),
+                    gender,
+                    bio,
+                    profile_visibility,
+                });
+            // const user = await db("user").select("id").where({ email }).first();
 
-        await db("user").where({ email }).update({
-            username,
-            height,
-            weight,
-            rating,
-            budget,
-            profile_pic: image_url,
-            dob,
-            gender,
-            bio,
-            profile_visibility,
-        });
-        const userId = await db("user").select("id").where({ email }).first();
-        await db("outfit").insert({
-            user_id: userId,
-            outfit_pic_link: image_url,
-        });
-
+            // if (previousImage.profile_pic !== image_url) {
+            //     await db("outfit").insert({
+            //         user_id: user.id,
+            //         outfit_pic_link: image_url,
+            //     });
+            // }
+        } else {
+            await db("user").where({ email }).update({
+                username,
+                height,
+                weight,
+                rating,
+                budget,
+                dob,
+                gender,
+                bio,
+                profile_visibility,
+            });
+        }
         const updatedUser = await db("user").where({ email }).first();
         res.status(200).json(updatedUser);
     } catch (error) {
@@ -147,7 +178,6 @@ export const getOutfits = async (
     }
 };
 
-// openai needs a dollar in balance
 export const uploadOutfit = async (
     req: Request & { decoded?: { username: string; email: string } },
     res: Response
