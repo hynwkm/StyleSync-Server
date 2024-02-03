@@ -93,7 +93,6 @@ export const editProfile = async (
             bio,
             profile_visibility,
         } = req.body;
-        console.log(profile_pic);
         if (profile_pic) {
             const formData = new FormData();
             formData.append("key", IMG_API_KEY as string);
@@ -134,13 +133,14 @@ export const editProfile = async (
                     bio,
                     profile_visibility,
                 });
-            const user = await db("user").select("id").where({ email }).first();
-            if (previousImage.profile_pic !== image_url) {
-                await db("outfit").insert({
-                    user_id: user.id,
-                    outfit_pic_link: image_url,
-                });
-            }
+            // const user = await db("user").select("id").where({ email }).first();
+
+            // if (previousImage.profile_pic !== image_url) {
+            //     await db("outfit").insert({
+            //         user_id: user.id,
+            //         outfit_pic_link: image_url,
+            //     });
+            // }
         } else {
             await db("user").where({ email }).update({
                 username,
