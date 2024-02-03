@@ -103,6 +103,10 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+app.get("/", (_req, res) => {
+    res.status(200).send("endpoints: /api/login,signup,user,profile");
+});
+
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Listening on port ${process.env.PORT || 3000}`);
 });
