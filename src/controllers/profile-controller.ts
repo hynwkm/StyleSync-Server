@@ -157,14 +157,6 @@ export const editProfile = async (
                     bio,
                     profile_visibility,
                 });
-            // const user = await db("user").select("id").where({ email }).first();
-
-            // if (previousImage.profile_pic !== image_url) {
-            //     await db("outfit").insert({
-            //         user_id: user.id,
-            //         outfit_pic_link: image_url,
-            //     });
-            // }
         } else {
             await db("user").where({ email }).update({
                 username,
@@ -195,7 +187,8 @@ export const getOutfits = async (
         const data = await db("user")
             .join("outfit", { "user.id": "outfit.user_id" })
             .select("outfit.id", "outfit.outfit_pic_link")
-            .where({ email });
+            .where({ email })
+            .orderBy("upload_datetime", "desc");
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send("Server error in getting outfits");
@@ -219,20 +212,41 @@ export const uploadOutfit = async (
         const { email } = req.decoded ?? {};
         const { outfit_pic_link } = req.body;
 
-        const user = await db("user").select("id").where({ email }).first();
-        const data = await db("outfit").insert({
-            user_id: user.id,
-            outfit_pic_link,
+        const formData = new FormData();
+        formData.append("key", IMG_API_KEY as string);
+        formData.append("action", "upload");
+        const base64ImageContent = outfit_pic_link.replace(
+            /^data:image\/\w+;base64,/,
+            ""
+        );
+        formData.append("source", base64ImageContent);
+        formData.append("format", "json");
+        const response = await axios.post(IMG_API_URL, formData, {
+            headers: {
+                ...formData.getHeaders(),
+            },
         });
+        const image_url = response.data.image.url;
 
-        const arrayOfClothing = await identifyClothing(outfit_pic_link);
+        const user = await db("user").select("id").where({ email }).first();
+        const [outfitId] = await db("outfit").insert({
+            user_id: user.id,
+            outfit_pic_link: image_url,
+        });
+        const uploadedOutfit = await db("outfit")
+            .select("*")
+            .where({ id: outfitId })
+            .first();
+
+        const arrayOfClothing = await identifyClothing(image_url);
         try {
             await Promise.all(
                 arrayOfClothing.map(async (clothing) => {
                     await db("clothing_item").insert({
-                        outfit_id: data,
+                        outfit_id: outfitId,
                         type: clothing.type,
                         color: clothing.color,
+                        style: clothing.style,
                         rating: 3.0,
                         price: getPrice(),
                         purchase_link: "https://example.com/product/12345",
@@ -241,11 +255,11 @@ export const uploadOutfit = async (
                 })
             );
         } catch (error) {
-            console.error("Failed to insert clothing items:", error);
+            console.error(error);
         }
-        res.status(200).json(data);
+        res.status(200).json(uploadedOutfit);
     } catch (error) {
-        res.status(500).send("Server error in getting outfits");
+        res.status(500).send(error);
     }
 };
 

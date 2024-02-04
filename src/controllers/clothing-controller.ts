@@ -11,7 +11,9 @@ export const getOneClothing = async (req: Request, res: Response) => {
         const data = await db("clothing_item")
             .select(
                 "id",
+                "outfit_id",
                 "type",
+                "style",
                 "color",
                 "rating",
                 "price",
