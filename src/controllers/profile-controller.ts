@@ -229,19 +229,21 @@ export const uploadOutfit = async (
         const image_url = response.data.image.url;
 
         const user = await db("user").select("id").where({ email }).first();
-        const data = await db("outfit")
-            .insert({
-                user_id: user.id,
-                outfit_pic_link: image_url,
-            })
-            .returning("*");
+        const [outfitId] = await db("outfit").insert({
+            user_id: user.id,
+            outfit_pic_link: image_url,
+        });
+        const uploadedOutfit = await db("outfit")
+            .select("*")
+            .where({ id: outfitId })
+            .first();
 
         const arrayOfClothing = await identifyClothing(image_url);
         try {
             await Promise.all(
                 arrayOfClothing.map(async (clothing) => {
                     await db("clothing_item").insert({
-                        outfit_id: data[0].id,
+                        outfit_id: outfitId,
                         type: clothing.type,
                         color: clothing.color,
                         style: clothing.style,
@@ -255,7 +257,7 @@ export const uploadOutfit = async (
         } catch (error) {
             console.error(error);
         }
-        res.status(200).json(data[0]);
+        res.status(200).json(uploadedOutfit);
     } catch (error) {
         res.status(500).send(error);
     }
