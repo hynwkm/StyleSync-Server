@@ -11,6 +11,7 @@ import { isEmail, isStrongPassword } from "validator";
 import knexConfig from "../knexfile";
 
 // Routes
+import clothingRoutes from "./routes/clothing-routes";
 import profileRoutes from "./routes/profile-routes";
 import userRoutes from "./routes/user-routes";
 
@@ -31,6 +32,7 @@ const db = knex(knexConfig);
 
 app.use("/api/user", userRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/clothing", clothingRoutes);
 
 app.post("/api/signup", async (req, res) => {
     try {

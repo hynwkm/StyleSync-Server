@@ -61,7 +61,8 @@ export const getAllOutfits = async (req: Request, res: Response) => {
         const { userId } = req.params;
         const data = await db("outfit")
             .select("outfit.id", "outfit_pic_link")
-            .where({ user_id: userId });
+            .where({ user_id: userId })
+            .orderBy("upload_datetime", "desc");
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send(error);

@@ -16,34 +16,61 @@ const IMG_API_URL: string =
 const IMG_API_KEY: string =
     process.env.IMG_API_KEY || "6d207e02198a847aa98d0a2a901485a5";
 
-async function identifyClothing(url: string): Promise<void> {
+interface ClothingItem {
+    type: string;
+    color: string;
+    style: string;
+}
+
+async function identifyClothing(url: string): Promise<ClothingItem[]> {
     const response = await openai.chat.completions.create({
         model: "gpt-4-vision-preview",
+        max_tokens: 1500,
         messages: [
-            // {
-            //     role: "system",
-            //     content:
-            //         "List each visible article of clothing by its descriptive name only, suitable as a search term.",
-            // },
+            {
+                role: "system",
+                content:
+                    'Your task is to analyze a provided image and identify articles of clothing. The response should be in JSON format, mimicking a predefined schema. The schema defines each clothing item with \'type\', \'color\', and \'style\' properties. Provide the analysis for the top three most visible clothing items in the image. Your response should be structured as follows: [{"type": "string", "color": "string", "style": "string"}]. Respond with only the JSON representation of the analysis, with no additional text.',
+            },
             {
                 role: "user",
                 content: [
                     {
                         type: "text",
-                        text: "Name each clothing item visible, one by one.",
+                        text: 'Analyze the image and provide a JSON response detailing the top three clothing items visible, including their type, color, and style, according to the schema described. Example output for other images have been: [{"type": "jacket", "color": "black", "style": "leather"}, {"type": "shirt", "color": "white", "style": "linen button-up"}, {"type": "pants", "color": "blue", "style": "denim jeans"}].',
                     },
                     {
                         type: "image_url",
                         image_url: {
                             url,
-                            detail: "low",
                         },
                     },
                 ],
             },
         ],
     });
-    console.log(response.choices[0].message);
+
+    const content = response.choices[0].message.content;
+    if (content === null) {
+        console.error("Received null content.");
+        // Handle null content appropriately, e.g., return an empty array or throw an error
+        return [];
+    }
+    try {
+        const match = content.match(/\[.*\]/s);
+        if (match) {
+            const jsonString = match[0];
+            const parsedResponse = JSON.parse(jsonString);
+            return parsedResponse;
+        } else {
+            return [];
+        }
+        // Assuming parsedResponse is already ClothingItem[], directly return it
+    } catch (error) {
+        console.error("Failed to parse response:", error);
+        // Return an empty array or throw an error as appropriate for your application
+        return [];
+    }
 }
 
 export const getProfile = async (
@@ -109,10 +136,7 @@ export const editProfile = async (
                 },
             });
             const image_url = response.data.image.url;
-            const previousImage = await db("user")
-                .select("profile_pic")
-                .where({ email })
-                .first();
+            await db("user").select("profile_pic").where({ email }).first();
 
             await db("user")
                 .where({ email })
@@ -178,6 +202,15 @@ export const getOutfits = async (
     }
 };
 
+function getPrice() {
+    const min = 20;
+    const max = 200;
+    const biasedRandom = Math.sqrt(Math.random());
+    // Scale the biased random number back to our desired range (min to max)
+    const price = Math.floor(biasedRandom * (max - min + 1) + min) + 0.99;
+    return price;
+}
+
 export const uploadOutfit = async (
     req: Request & { decoded?: { username: string; email: string } },
     res: Response
@@ -192,8 +225,24 @@ export const uploadOutfit = async (
             outfit_pic_link,
         });
 
-        identifyClothing(outfit_pic_link);
-
+        const arrayOfClothing = await identifyClothing(outfit_pic_link);
+        try {
+            await Promise.all(
+                arrayOfClothing.map(async (clothing) => {
+                    await db("clothing_item").insert({
+                        outfit_id: data,
+                        type: clothing.type,
+                        color: clothing.color,
+                        rating: 3.0,
+                        price: getPrice(),
+                        purchase_link: "https://example.com/product/12345",
+                        image_url: "https://example.com/images/tshirt_blue.jpg",
+                    });
+                })
+            );
+        } catch (error) {
+            console.error("Failed to insert clothing items:", error);
+        }
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send("Server error in getting outfits");
