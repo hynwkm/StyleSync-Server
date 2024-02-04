@@ -57,10 +57,15 @@ async function identifyClothing(url: string): Promise<ClothingItem[]> {
         return [];
     }
     try {
-        // Parse the JSON string to an object
-        const parsedResponse = JSON.parse(content);
+        const match = content.match(/\[.*\]/s);
+        if (match) {
+            const jsonString = match[0];
+            const parsedResponse = JSON.parse(jsonString);
+            return parsedResponse;
+        } else {
+            return [];
+        }
         // Assuming parsedResponse is already ClothingItem[], directly return it
-        return parsedResponse;
     } catch (error) {
         console.error("Failed to parse response:", error);
         // Return an empty array or throw an error as appropriate for your application
@@ -131,10 +136,7 @@ export const editProfile = async (
                 },
             });
             const image_url = response.data.image.url;
-            const previousImage = await db("user")
-                .select("profile_pic")
-                .where({ email })
-                .first();
+            await db("user").select("profile_pic").where({ email }).first();
 
             await db("user")
                 .where({ email })
@@ -200,6 +202,15 @@ export const getOutfits = async (
     }
 };
 
+function getPrice() {
+    const min = 20;
+    const max = 200;
+    const biasedRandom = Math.sqrt(Math.random());
+    // Scale the biased random number back to our desired range (min to max)
+    const price = Math.floor(biasedRandom * (max - min + 1) + min) + 0.99;
+    return price;
+}
+
 export const uploadOutfit = async (
     req: Request & { decoded?: { username: string; email: string } },
     res: Response
@@ -214,8 +225,24 @@ export const uploadOutfit = async (
             outfit_pic_link,
         });
 
-        identifyClothing(outfit_pic_link);
-
+        const arrayOfClothing = await identifyClothing(outfit_pic_link);
+        try {
+            await Promise.all(
+                arrayOfClothing.map(async (clothing) => {
+                    await db("clothing_item").insert({
+                        outfit_id: data,
+                        type: clothing.type,
+                        color: clothing.color,
+                        rating: 3.0,
+                        price: getPrice(),
+                        purchase_link: "https://example.com/product/12345",
+                        image_url: "https://example.com/images/tshirt_blue.jpg",
+                    });
+                })
+            );
+        } catch (error) {
+            console.error("Failed to insert clothing items:", error);
+        }
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send("Server error in getting outfits");
