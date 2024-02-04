@@ -16,34 +16,56 @@ const IMG_API_URL: string =
 const IMG_API_KEY: string =
     process.env.IMG_API_KEY || "6d207e02198a847aa98d0a2a901485a5";
 
-async function identifyClothing(url: string): Promise<void> {
+interface ClothingItem {
+    type: string;
+    color: string;
+    style: string;
+}
+
+async function identifyClothing(url: string): Promise<ClothingItem[]> {
     const response = await openai.chat.completions.create({
         model: "gpt-4-vision-preview",
+        max_tokens: 1500,
         messages: [
-            // {
-            //     role: "system",
-            //     content:
-            //         "List each visible article of clothing by its descriptive name only, suitable as a search term.",
-            // },
+            {
+                role: "system",
+                content:
+                    'Your task is to analyze a provided image and identify articles of clothing. The response should be in JSON format, mimicking a predefined schema. The schema defines each clothing item with \'type\', \'color\', and \'style\' properties. Provide the analysis for the top three most visible clothing items in the image. Your response should be structured as follows: [{"type": "string", "color": "string", "style": "string"}]. Respond with only the JSON representation of the analysis, with no additional text.',
+            },
             {
                 role: "user",
                 content: [
                     {
                         type: "text",
-                        text: "Name each clothing item visible, one by one.",
+                        text: 'Analyze the image and provide a JSON response detailing the top three clothing items visible, including their type, color, and style, according to the schema described. Example output for other images have been: [{"type": "jacket", "color": "black", "style": "leather"}, {"type": "shirt", "color": "white", "style": "linen button-up"}, {"type": "pants", "color": "blue", "style": "denim jeans"}].',
                     },
                     {
                         type: "image_url",
                         image_url: {
                             url,
-                            detail: "low",
                         },
                     },
                 ],
             },
         ],
     });
-    console.log(response.choices[0].message);
+
+    const content = response.choices[0].message.content;
+    if (content === null) {
+        console.error("Received null content.");
+        // Handle null content appropriately, e.g., return an empty array or throw an error
+        return [];
+    }
+    try {
+        // Parse the JSON string to an object
+        const parsedResponse = JSON.parse(content);
+        // Assuming parsedResponse is already ClothingItem[], directly return it
+        return parsedResponse;
+    } catch (error) {
+        console.error("Failed to parse response:", error);
+        // Return an empty array or throw an error as appropriate for your application
+        return [];
+    }
 }
 
 export const getProfile = async (
