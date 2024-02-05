@@ -7,7 +7,7 @@
         "build": "tsc",
         "start": "node dist/src/index.js",
         "dev": "nodemon --exec ts-node src/index.ts",
-        "migrate": "npx ts-node node_modules/knex/bin/cli.js migrate:latest",
+        "migrate": "knex migrate:latest --knexfile knexfile.js",
         "migrate:down": "knex migrate:down",
         "migrate:rollback": "knex migrate:rollback",
         "seed": "knex seed:run",
