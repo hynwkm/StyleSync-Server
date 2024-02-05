@@ -32,11 +32,11 @@ const saltRounds = 10;
 
         const db = await connect();
 
-        app.use("api/user", userRoutes(db));
-        app.use("api/profile", profileRoutes(db));
-        app.use("api/clothing", clothingRoutes(db));
+        app.use("/api/user", userRoutes(db));
+        app.use("/api/profile", profileRoutes(db));
+        app.use("/api/clothing", clothingRoutes(db));
 
-        app.post("api/signup", async (req, res) => {
+        app.post("/api/signup", async (req, res) => {
             try {
                 const { username, password, email } = req.body;
 
@@ -84,7 +84,7 @@ const saltRounds = 10;
             }
         });
 
-        app.post("api/login", async (req, res) => {
+        app.post("/api/login", async (req, res) => {
             const { email, password } = req.body;
             try {
                 // Retrieve user from the database
@@ -112,7 +112,7 @@ const saltRounds = 10;
             }
         });
 
-        app.get("", (_req, res) => {
+        app.get("/", (_req, res) => {
             res.status(200).send("endpoints: /api/login,signup,user,profile");
         });
 
