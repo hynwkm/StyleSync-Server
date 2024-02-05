@@ -1,31 +1,13 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.seed = void 0;
-const clothing_items_1 = __importDefault(require("../database/seed-data/clothing_items"));
-const outfits_1 = __importDefault(require("../database/seed-data/outfits"));
-const users_1 = __importDefault(require("../database/seed-data/users"));
-function seed(knex) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Deletes ALL existing entries
-        yield knex("user").del();
-        yield knex("outfit").del();
-        yield knex("clothing_item").del();
-        // Inserts seed entries
-        yield knex("user").insert(users_1.default);
-        yield knex("outfit").insert(outfits_1.default);
-        yield knex("clothing_item").insert(clothing_items_1.default);
-    });
+import clothingItemsData from "../database/seed-data/clothing_items";
+import outfitsData from "../database/seed-data/outfits";
+import usersData from "../database/seed-data/users";
+export async function seed(knex) {
+    // Deletes ALL existing entries
+    await knex("user").del();
+    await knex("outfit").del();
+    await knex("clothing_item").del();
+    // Inserts seed entries
+    await knex("user").insert(usersData);
+    await knex("outfit").insert(outfitsData);
+    await knex("clothing_item").insert(clothingItemsData);
 }
-exports.seed = seed;

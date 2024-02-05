@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 function calculateAgeDifference(dob1, dob2) {
     const birthDate1 = new Date(dob1);
     const birthDate2 = new Date(dob2);
@@ -40,7 +38,7 @@ function calculateSimilarity(user1, user2) {
     if (user1.budget != null && user2.budget != null) {
         const budgetDifference = Math.abs(user1.budget - user2.budget);
         budgetScore =
-            Math.max(1 - Math.pow((budgetDifference / maxBudgetDifference), 2), 0) *
+            Math.max(1 - (budgetDifference / maxBudgetDifference) ** 2, 0) *
                 0.25;
         activeWeights += 0.25;
     }
@@ -49,11 +47,10 @@ function calculateSimilarity(user1, user2) {
     // Normalizing the total score to a 0-100 scale
     return activeWeights > 0 ? (totalScore / activeWeights) * 100 : 0;
 }
-function findSimilarUsers(current_user, all_users) {
+export default function findSimilarUsers(current_user, all_users) {
     const similarityScores = all_users.map((user) => [
         user,
         calculateSimilarity(current_user, user),
     ]);
     return similarityScores.sort((a, b) => b[1] - a[1]);
 }
-exports.default = findSimilarUsers;

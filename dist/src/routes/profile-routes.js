@@ -1,43 +1,25 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const profileController = __importStar(require("../controllers/profile-controller"));
-const authorize_1 = __importDefault(require("../middlewares/authorize"));
-const router = express_1.default.Router();
-router
-    .route("/")
-    .get(authorize_1.default, profileController.getProfile)
-    .put(authorize_1.default, profileController.editProfile);
-router
-    .route("/outfits")
-    .get(authorize_1.default, profileController.getOutfits)
-    .post(authorize_1.default, profileController.uploadOutfit)
-    .put(authorize_1.default, profileController.editOutfit)
-    .delete(authorize_1.default, profileController.deleteOutfit);
-exports.default = router;
+import express from "express";
+import * as favoritesController from "../controllers/favorites-controller.js";
+import * as profileController from "../controllers/profile-controller.js";
+import authorize from "../middlewares/authorize.js";
+export default function profileRoutes(db) {
+    const router = express.Router();
+    router
+        .route("/")
+        .get(authorize, profileController.getProfile(db))
+        .put(authorize, profileController.editProfile(db));
+    router
+        .route("/outfits")
+        .get(authorize, profileController.getOutfits(db))
+        .post(authorize, profileController.uploadOutfit(db))
+        .put(authorize, profileController.editOutfit(db))
+        .delete(authorize, profileController.deleteOutfit(db));
+    router
+        .route("/favorite")
+        .get(authorize, favoritesController.getAllFavorites(db));
+    router
+        .route("/favorite/:outfitId")
+        .post(authorize, favoritesController.addFavorite(db))
+        .delete(authorize, favoritesController.deleteFavorite(db));
+    return router;
+}
