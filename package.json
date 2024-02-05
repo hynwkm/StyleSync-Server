@@ -7,7 +7,7 @@
         "build": "tsc",
         "start": "node dist/src/index.js",
         "dev": "nodemon --exec ts-node src/index.ts",
-        "migrate": "knex migrate:latest --knexfile knexfile.js",
+        "migrate": "ts-node node_modules/knex/bin/cli.js migrate:latest --knexfile knexfile.mjs",
         "migrate:down": "knex migrate:down",
         "migrate:rollback": "knex migrate:rollback",
         "seed": "knex seed:run",
@@ -17,7 +17,6 @@
     "engines": {
         "node": ">=14"
     },
-    "type": "module",
     "license": "ISC",
     "dependencies": {
         "axios": "^1.6.7",
