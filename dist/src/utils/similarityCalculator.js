@@ -38,7 +38,7 @@ function calculateSimilarity(user1, user2) {
     if (user1.budget != null && user2.budget != null) {
         const budgetDifference = Math.abs(user1.budget - user2.budget);
         budgetScore =
-            Math.max(1 - (budgetDifference / maxBudgetDifference) ** 2, 0) *
+            Math.max(1 - Math.pow((budgetDifference / maxBudgetDifference), 2), 0) *
                 0.25;
         activeWeights += 0.25;
     }
