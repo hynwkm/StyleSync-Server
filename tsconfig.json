@@ -116,6 +116,5 @@
             "module": "CommonJS"
         },
         "esm": true
-    },
-    "extends": "@tsconfig/recommended/tsconfig.json"
+    }
 }
