@@ -34,6 +34,19 @@ export async function up(knex: Knex): Promise<void> {
             table.decimal("price", 10, 2); // Assuming a maximum of 10 digits with 2 decimal places
             table.string("purchase_link");
             table.string("image_url");
+            table.string("style");
+        })
+        .createTable("favorites", function (table) {
+            table.increments("id").primary();
+            table.integer("user_id").unsigned().notNullable();
+            table.integer("outfit_id").unsigned().notNullable();
+            table.timestamp("date_favorited").defaultTo(knex.fn.now());
+            table.foreign("user_id").references("user.id").onDelete("CASCADE");
+            table
+                .foreign("outfit_id")
+                .references("outfit.id")
+                .onDelete("CASCADE");
+            table.unique(["user_id", "outfit_id"]);
         });
 }
 

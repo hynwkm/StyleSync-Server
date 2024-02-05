@@ -23,7 +23,8 @@ export const getAllUsers = async (_req: Request, res: Response) => {
                 "gender",
                 "bio"
             )
-            .where({ profile_visibility: 1 });
+            .where({ profile_visibility: 1 })
+            .orderBy("rating", "desc");
         res.status(200).json(data);
     } catch (error) {
         res.status(500).send("Server error in getting users");

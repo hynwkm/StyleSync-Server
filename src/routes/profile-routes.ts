@@ -1,4 +1,5 @@
 import express from "express";
+import * as favoritesController from "../controllers/favorites-controller";
 import * as profileController from "../controllers/profile-controller";
 import authorize from "../middlewares/authorize";
 
@@ -15,5 +16,12 @@ router
     .post(authorize, profileController.uploadOutfit)
     .put(authorize, profileController.editOutfit)
     .delete(authorize, profileController.deleteOutfit);
+
+router.route("/favorite").get(authorize, favoritesController.getAllFavorites);
+
+router
+    .route("/favorite/:outfitId")
+    .post(authorize, favoritesController.addFavorite)
+    .delete(authorize, favoritesController.deleteFavorite);
 
 export default router;
