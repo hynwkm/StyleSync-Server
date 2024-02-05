@@ -290,16 +290,27 @@ export const deleteOutfit = async (
         const { id } = req.body;
 
         const user = await db("user").select("id").where({ email }).first();
-        const outfit = await db("outfit")
-            .select("id")
-            .where({ user_id: user.id, id })
-            .first();
-        await db("clothing_item").where({ outfit_id: outfit.id }).del();
-        await db("outfit").where({ id: outfit.id }).del();
+        const result = await db.transaction(async (trx) => {
+            const outfit = await trx("outfit")
+                .select("id") // Assuming these are the fields you want to return
+                .where({ user_id: user.id, id })
+                .first();
 
-        res.status(200).send("Outfit deleted Successfully");
+            if (!outfit) {
+                return res.status(404).json({ error: "Outfit not found" });
+            }
+
+            await trx("clothing_item").where({ outfit_id: outfit.id }).del();
+            await trx("outfit").where({ id: outfit.id }).del();
+
+            return outfit;
+        });
+        res.status(200).json({
+            message: "Outfit deleted successfully",
+            deletedOutfit: result,
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Server error in getting outfits");
+        console.error("Error deleting outfit:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
