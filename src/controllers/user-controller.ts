@@ -1,37 +1,34 @@
 import { Request, Response } from "express";
-import knex from "knex";
-import User from "../models/users";
-import findSimilarUsers from "../utils/similarityCalculator";
+import { Knex } from "knex";
+import User from "../models/users.js";
+import findSimilarUsers from "../utils/similarityCalculator.js";
 
-import knexConfig from "../../knexfile";
+export const getAllUsers =
+    (db: Knex) => async (_req: Request, res: Response) => {
+        try {
+            const data = await db("user")
+                .select(
+                    "id",
+                    "username",
+                    "email",
+                    "height",
+                    "weight",
+                    "rating",
+                    "budget",
+                    "profile_pic",
+                    "dob",
+                    "gender",
+                    "bio"
+                )
+                .where({ profile_visibility: 1 })
+                .orderBy("rating", "desc");
+            res.status(200).json(data);
+        } catch (error) {
+            res.status(500).send("Server error in getting users");
+        }
+    };
 
-const db = knex(knexConfig);
-
-export const getAllUsers = async (_req: Request, res: Response) => {
-    try {
-        const data = await db("user")
-            .select(
-                "id",
-                "username",
-                "email",
-                "height",
-                "weight",
-                "rating",
-                "budget",
-                "profile_pic",
-                "dob",
-                "gender",
-                "bio"
-            )
-            .where({ profile_visibility: 1 })
-            .orderBy("rating", "desc");
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).send("Server error in getting users");
-    }
-};
-
-export const getOneUser = async (req: Request, res: Response) => {
+export const getOneUser = (db: Knex) => async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
         const data = await db("user")
@@ -57,70 +54,73 @@ export const getOneUser = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllOutfits = async (req: Request, res: Response) => {
-    try {
-        const { userId } = req.params;
-        const data = await db("outfit")
-            .select("outfit.id", "outfit_pic_link")
-            .where({ user_id: userId })
-            .orderBy("upload_datetime", "desc");
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-};
-
-export const getAllUsersSorted = async (
-    req: Request & { decoded?: { username: string; email: string } },
-    res: Response
-) => {
-    try {
-        const { email } = req.decoded ?? {};
-        const loggedInUser: User = await db("user")
-            .select(
-                "id",
-                "username",
-                "email",
-                "height",
-                "weight",
-                "rating",
-                "budget",
-                "profile_pic",
-                "dob",
-                "gender",
-                "bio"
-            )
-            .where({ email })
-            .first();
-
-        let allUsers = await db("user")
-            .select(
-                "id",
-                "username",
-                "email",
-                "height",
-                "weight",
-                "rating",
-                "budget",
-                "profile_pic",
-                "dob",
-                "gender",
-                "bio"
-            )
-            .where({ profile_visibility: 1 });
-        if (loggedInUser.gender !== null) {
-            if (loggedInUser.gender) {
-                allUsers = allUsers.filter(
-                    (user) => user.gender === loggedInUser.gender
-                );
-            }
+export const getAllOutfits =
+    (db: Knex) => async (req: Request, res: Response) => {
+        try {
+            const { userId } = req.params;
+            const data = await db("outfit")
+                .select("outfit.id", "outfit_pic_link")
+                .where({ user_id: userId })
+                .orderBy("upload_datetime", "desc");
+            res.status(200).json(data);
+        } catch (error) {
+            res.status(500).send(error);
         }
-        let sortedUsers = findSimilarUsers(loggedInUser, allUsers);
-        sortedUsers = sortedUsers.filter(
-            (person) => person[0].id !== loggedInUser.id
-        );
-        res.status(200).json(sortedUsers);
-    } catch (error) {
-        res.status(500).send("Server error in getting sorted users");
-    }
-};
+    };
+
+export const getAllUsersSorted =
+    (db: Knex) =>
+    async (
+        req: Request & { decoded?: { username: string; email: string } },
+        res: Response
+    ) => {
+        try {
+            const { email } = req.decoded ?? {};
+            const loggedInUser: User = await db("user")
+                .select(
+                    "id",
+                    "username",
+                    "email",
+                    "height",
+                    "weight",
+                    "rating",
+                    "budget",
+                    "profile_pic",
+                    "dob",
+                    "gender",
+                    "bio"
+                )
+                .where({ email })
+                .first();
+
+            let allUsers = await db("user")
+                .select(
+                    "id",
+                    "username",
+                    "email",
+                    "height",
+                    "weight",
+                    "rating",
+                    "budget",
+                    "profile_pic",
+                    "dob",
+                    "gender",
+                    "bio"
+                )
+                .where({ profile_visibility: 1 });
+            if (loggedInUser.gender !== null) {
+                if (loggedInUser.gender) {
+                    allUsers = allUsers.filter(
+                        (user) => user.gender === loggedInUser.gender
+                    );
+                }
+            }
+            let sortedUsers = findSimilarUsers(loggedInUser, allUsers);
+            sortedUsers = sortedUsers.filter(
+                (person) => person[0].id !== loggedInUser.id
+            );
+            res.status(200).json(sortedUsers);
+        } catch (error) {
+            res.status(500).send("Server error in getting sorted users");
+        }
+    };

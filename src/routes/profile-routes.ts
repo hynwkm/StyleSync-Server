@@ -1,27 +1,32 @@
 import express from "express";
-import * as favoritesController from "../controllers/favorites-controller";
-import * as profileController from "../controllers/profile-controller";
-import authorize from "../middlewares/authorize";
+import { Knex } from "knex";
+import * as favoritesController from "../controllers/favorites-controller.js";
+import * as profileController from "../controllers/profile-controller.js";
+import authorize from "../middlewares/authorize.js";
 
-const router = express.Router();
+export default function profileRoutes(db: Knex) {
+    const router = express.Router();
 
-router
-    .route("/")
-    .get(authorize, profileController.getProfile)
-    .put(authorize, profileController.editProfile);
+    router
+        .route("/")
+        .get(authorize, profileController.getProfile(db))
+        .put(authorize, profileController.editProfile(db));
 
-router
-    .route("/outfits")
-    .get(authorize, profileController.getOutfits)
-    .post(authorize, profileController.uploadOutfit)
-    .put(authorize, profileController.editOutfit)
-    .delete(authorize, profileController.deleteOutfit);
+    router
+        .route("/outfits")
+        .get(authorize, profileController.getOutfits(db))
+        .post(authorize, profileController.uploadOutfit(db))
+        .put(authorize, profileController.editOutfit(db))
+        .delete(authorize, profileController.deleteOutfit(db));
 
-router.route("/favorite").get(authorize, favoritesController.getAllFavorites);
+    router
+        .route("/favorite")
+        .get(authorize, favoritesController.getAllFavorites(db));
 
-router
-    .route("/favorite/:outfitId")
-    .post(authorize, favoritesController.addFavorite)
-    .delete(authorize, favoritesController.deleteFavorite);
+    router
+        .route("/favorite/:outfitId")
+        .post(authorize, favoritesController.addFavorite(db))
+        .delete(authorize, favoritesController.deleteFavorite(db));
 
-export default router;
+    return router;
+}
