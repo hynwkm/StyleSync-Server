@@ -10,8 +10,7 @@
         "migrate": "node dist/src/migrations/migrate.js",
         "migrate:down": "knex migrate:down",
         "migrate:rollback": "knex migrate:rollback",
-        "seed": "knex seed:run",
-        "heroku-postbuild": "npm run migrate"
+        "seed": "knex seed:run"
     },
     "author": "",
     "engines": {
