@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const dbUri = process.env.JAWSDB_URL;
-const dbConfig = new URI(dbUri);
+const dbConfig = new URL(dbUri);
 
 const knexConfig = {
     client: "mysql2",
