@@ -21,6 +21,7 @@ export default async function authorize(
         req.decoded = decoded;
         next();
     } catch (error) {
-        res.status(401).send("Unauthorized");
+        console.log(error);
+        res.status(401).send(error);
     }
 }
