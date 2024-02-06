@@ -72,8 +72,6 @@ export const deleteFavorite =
                 });
             }
         } catch (error) {
-            res.status(500).json({
-                error: "An error occurred while fetching the data.",
-            });
+            res.status(500).json(error);
         }
     };
