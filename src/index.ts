@@ -113,7 +113,9 @@ const saltRounds = 10;
         });
 
         app.get("/", (_req, res) => {
-            res.status(200).send("endpoints: /api/login,signup,user,profile");
+            res.status(200).send(
+                "Available Endpoints: /api/login, /api/signup, /api/user, /api/profile"
+            );
         });
 
         app.listen(process.env.PORT || 3000, () => {

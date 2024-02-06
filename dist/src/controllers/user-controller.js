@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import findSimilarUsers from "../utils/similarityCalculator.js";
-export const getAllUsers = (db) => (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+export const getAllUsers = (db) => (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = yield db("user")
             .select("id", "username", "email", "height", "weight", "rating", "budget", "profile_pic", "dob", "gender", "bio")
@@ -17,7 +17,7 @@ export const getAllUsers = (db) => (_req, res) => __awaiter(void 0, void 0, void
         res.status(200).json(data);
     }
     catch (error) {
-        res.status(500).send("Server error in getting users");
+        res.status(500).send(req);
     }
 });
 export const getOneUser = (db) => (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,6 +48,7 @@ export const getAllOutfits = (db) => (req, res) => __awaiter(void 0, void 0, voi
 });
 export const getAllUsersSorted = (db) => (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    console.log(req);
     try {
         const { email } = (_a = req.decoded) !== null && _a !== void 0 ? _a : {};
         const loggedInUser = yield db("user")
@@ -67,6 +68,6 @@ export const getAllUsersSorted = (db) => (req, res) => __awaiter(void 0, void 0,
         res.status(200).json(sortedUsers);
     }
     catch (error) {
-        res.status(500).send("Server error in getting sorted users");
+        res.status(500).send(req);
     }
 });
