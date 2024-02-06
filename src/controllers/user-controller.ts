@@ -4,7 +4,7 @@ import User from "../models/users.js";
 import findSimilarUsers from "../utils/similarityCalculator.js";
 
 export const getAllUsers =
-    (db: Knex) => async (_req: Request, res: Response) => {
+    (db: Knex) => async (req: Request, res: Response) => {
         try {
             const data = await db("user")
                 .select(
@@ -24,7 +24,7 @@ export const getAllUsers =
                 .orderBy("rating", "desc");
             res.status(200).json(data);
         } catch (error) {
-            res.status(500).send("Server error in getting users");
+            res.status(500).send(req);
         }
     };
 
@@ -74,6 +74,7 @@ export const getAllUsersSorted =
         req: Request & { decoded?: { username: string; email: string } },
         res: Response
     ) => {
+        console.log(req);
         try {
             const { email } = req.decoded ?? {};
             const loggedInUser: User = await db("user")
@@ -121,6 +122,6 @@ export const getAllUsersSorted =
             );
             res.status(200).json(sortedUsers);
         } catch (error) {
-            res.status(500).send("Server error in getting sorted users");
+            res.status(500).send(req);
         }
     };
