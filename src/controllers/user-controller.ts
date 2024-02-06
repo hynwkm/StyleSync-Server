@@ -74,7 +74,6 @@ export const getAllUsersSorted =
         req: Request & { decoded?: { username: string; email: string } },
         res: Response
     ) => {
-        console.log(req);
         try {
             const { email } = req.decoded ?? {};
             const loggedInUser: User = await db("user")

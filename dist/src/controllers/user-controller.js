@@ -48,7 +48,6 @@ export const getAllOutfits = (db) => (req, res) => __awaiter(void 0, void 0, voi
 });
 export const getAllUsersSorted = (db) => (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    console.log(req);
     try {
         const { email } = (_a = req.decoded) !== null && _a !== void 0 ? _a : {};
         const loggedInUser = yield db("user")
