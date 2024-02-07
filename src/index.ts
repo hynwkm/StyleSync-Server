@@ -52,11 +52,11 @@ const saltRounds = 10;
                         .send("Please enter a valid email address.");
                 }
 
-                if (!isStrongPassword(password)) {
-                    return res
-                        .status(400)
-                        .send("Please enter a strong password.");
-                }
+                // if (!isStrongPassword(password)) {
+                //     return res
+                //         .status(400)
+                //         .send("Please enter a strong password.");
+                // }
 
                 const existingUser = await db("user")
                     .select("id")
