@@ -40,19 +40,22 @@ const saltRounds = 10;
             try {
                 const { username, password, email } = req.body;
 
-                if (
-                    !(
-                        username.trim() &&
-                        email.trim() &&
-                        isEmail(email) &&
-                        isStrongPassword(password)
-                    )
-                ) {
+                if (!username.trim()) {
                     return res
                         .status(400)
-                        .send(
-                            "Please enter a valid username, email, and strong password"
-                        );
+                        .send("Please enter a valid username.");
+                }
+
+                if (!email.trim() || !isEmail(email)) {
+                    return res
+                        .status(400)
+                        .send("Please enter a valid email address.");
+                }
+
+                if (!isStrongPassword(password)) {
+                    return res
+                        .status(400)
+                        .send("Please enter a strong password.");
                 }
 
                 const existingUser = await db("user")
