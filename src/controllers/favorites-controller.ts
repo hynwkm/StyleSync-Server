@@ -12,15 +12,16 @@ export const getAllFavorites =
             const user = await db("user").select("id").where({ email }).first();
             const data = await db("favorites")
                 .join("outfit", { "favorites.outfit_id": "outfit.id" })
-                .select("outfit_id as id", "outfit_pic_link")
-                .where({
-                    user_id: user.id,
-                });
+                .select(
+                    "outfit_id as id",
+                    "favorites.user_id",
+                    "upload_datetime",
+                    "outfit_pic_link"
+                )
+                .where({ "favorites.user_id": user.id });
             res.status(200).json(data);
         } catch (error) {
-            res.status(500).json({
-                error: "An error occurred while fetching the data.",
-            });
+            res.status(500).json(error);
         }
     };
 
@@ -76,8 +77,6 @@ export const deleteFavorite =
                 });
             }
         } catch (error) {
-            res.status(500).json({
-                error: "An error occurred while fetching the data.",
-            });
+            res.status(500).json(error);
         }
     };
