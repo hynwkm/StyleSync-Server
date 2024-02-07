@@ -203,7 +203,7 @@ function getPrice() {
     const max = 200;
     const biasedRandom = Math.sqrt(Math.random());
     // Scale the biased random number back to our desired range (min to max)
-    const price = Math.floor(biasedRandom * (max - min + 1) + min) + 0.99;
+    const price = Math.floor((biasedRandom * (max - min + 1) + min) / 3) + 0.99;
     return price;
 }
 
