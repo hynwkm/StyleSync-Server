@@ -54,16 +54,18 @@ export const getAllUsersSorted = (db) => (req, res) => __awaiter(void 0, void 0,
             .select("id", "username", "email", "height", "weight", "rating", "budget", "profile_pic", "dob", "gender", "bio")
             .where({ email })
             .first();
-        let allUsers = yield db("user")
-            .select("id", "username", "email", "height", "weight", "rating", "budget", "profile_pic", "dob", "gender", "bio")
-            .where({ profile_visibility: 1 });
-        if (loggedInUser.gender !== null) {
-            if (loggedInUser.gender) {
-                allUsers = allUsers.filter((user) => user.gender === loggedInUser.gender);
-            }
+        if (!loggedInUser) {
+            return res.status(404).json({ error: "User not found." });
         }
+        let query = db("user")
+            .select("id", "username", "email", "height", "weight", "rating", "budget", "profile_pic", "dob", "gender", "bio")
+            .where("profile_visibility", 1)
+            .andWhere("id", "!=", loggedInUser.id);
+        if (loggedInUser.gender != null && loggedInUser.gender !== "") {
+            query = query.andWhere("gender", loggedInUser.gender);
+        }
+        let allUsers = yield query;
         let sortedUsers = findSimilarUsers(loggedInUser, allUsers);
-        sortedUsers = sortedUsers.filter((person) => person[0].id !== loggedInUser.id);
         res.status(200).json(sortedUsers);
     }
     catch (error) {
