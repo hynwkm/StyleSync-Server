@@ -12,7 +12,12 @@ export const getAllFavorites =
             const user = await db("user").select("id").where({ email }).first();
             const data = await db("favorites")
                 .join("outfit", { "favorites.outfit_id": "outfit.id" })
-                .select("outfit_id as id", "outfit_pic_link")
+                .select(
+                    "outfit_id as id",
+                    "favorites.user_id",
+                    "upload_datetime",
+                    "outfit_pic_link"
+                )
                 .where({ "favorites.user_id": user.id });
             res.status(200).json(data);
         } catch (error) {

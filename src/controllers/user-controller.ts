@@ -114,7 +114,7 @@ export const getAllUsersSorted =
                 .where("profile_visibility", 1)
                 .andWhere("id", "!=", loggedInUser.id);
 
-            if (loggedInUser.gender !== null) {
+            if (loggedInUser.gender != null && loggedInUser.gender !== "") {
                 query = query.andWhere("gender", loggedInUser.gender);
             }
 
