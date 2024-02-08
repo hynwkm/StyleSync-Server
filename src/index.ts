@@ -75,6 +75,7 @@ const saltRounds = 10;
                     username,
                     password: hashedPassword,
                     email,
+                    profile_visibility: 0,
                 });
                 const token = jwt.sign(
                     { email, username },
