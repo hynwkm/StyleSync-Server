@@ -50,7 +50,6 @@ async function identifyClothing(url: string): Promise<ClothingItem[]> {
     const content = response.choices[0].message.content;
     if (content === null) {
         console.error("Received null content.");
-        // Handle null content appropriately, e.g., return an empty array or throw an error
         return [];
     }
     try {
@@ -62,10 +61,9 @@ async function identifyClothing(url: string): Promise<ClothingItem[]> {
         } else {
             return [];
         }
-        // Assuming parsedResponse is already ClothingItem[], directly return it
     } catch (error) {
         console.error("Failed to parse response:", error);
-        // Return an empty array or throw an error as appropriate for your application
+
         return [];
     }
 }
@@ -149,7 +147,6 @@ export const editProfile =
                         budget,
                         profile_pic: image_url,
                         dob: new Date(dob).toLocaleDateString("en-CA", {
-                            // Using Canadian locale as an example to get YYYY-MM-DD format
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",
@@ -202,7 +199,6 @@ function getPrice() {
     const min = 20;
     const max = 200;
     const biasedRandom = Math.sqrt(Math.random());
-    // Scale the biased random number back to our desired range (min to max)
     const price = Math.floor((biasedRandom * (max - min + 1) + min) / 3) + 0.99;
     return price;
 }
@@ -304,7 +300,7 @@ export const deleteOutfit =
             const user = await db("user").select("id").where({ email }).first();
             const result = await db.transaction(async (trx) => {
                 const outfit = await trx("outfit")
-                    .select("id") // Assuming these are the fields you want to return
+                    .select("id")
                     .where({ user_id: user.id, id })
                     .first();
 
