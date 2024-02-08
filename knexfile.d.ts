@@ -1,4 +1,3 @@
-// knexfile.d.ts
 declare module "MyKnexConfig" {
     export interface KnexConfig {
         client: string;

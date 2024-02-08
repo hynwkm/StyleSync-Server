@@ -1,7 +1,7 @@
 export default interface clothing_item {
     id: number;
     outfit_id: number;
-    type: string; // T-shirt, Jeans, Shoes, etc.
+    type: string;
     color: string;
     rating: number;
     price: number;

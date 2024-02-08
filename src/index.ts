@@ -1,4 +1,3 @@
-// Import statements
 import bcrypt from "bcrypt";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -10,16 +9,10 @@ const { isEmail, isStrongPassword } = pkg;
 
 import { connect } from "../knexfile.js";
 
-// Routes
-
-// Middleware
-
-// Routes
 import clothingRoutes from "./routes/clothing-routes.js";
 import profileRoutes from "./routes/profile-routes.js";
 import userRoutes from "./routes/user-routes.js";
 
-// Constants
 const saltRounds = 10;
 
 (async () => {
@@ -52,11 +45,11 @@ const saltRounds = 10;
                         .send("Please enter a valid email address.");
                 }
 
-                // if (!isStrongPassword(password)) {
-                //     return res
-                //         .status(400)
-                //         .send("Please enter a strong password.");
-                // }
+                if (!isStrongPassword(password)) {
+                    return res
+                        .status(400)
+                        .send("Please enter a strong password.");
+                }
 
                 const existingUser = await db("user")
                     .select("id")

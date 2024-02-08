@@ -2,7 +2,7 @@ export default interface User {
     id: number;
     username: string;
     email: string;
-    dob: string; // Date of Birth
+    dob: string;
     gender: string;
     height: number;
     weight: number;

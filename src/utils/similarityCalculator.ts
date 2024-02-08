@@ -15,7 +15,7 @@ function calculateSimilarity(user1: User, user2: User): number {
     const maxAgeDifference = 50;
     const maxHeightDifference = 50;
     const maxWeightDifference = 50;
-    // Adjusted maximum budget difference for a single outfit
+
     const maxBudgetDifference = 200;
 
     let dobScore = 0,
@@ -24,14 +24,12 @@ function calculateSimilarity(user1: User, user2: User): number {
         budgetScore = 0;
     let activeWeights = 0;
 
-    // Date of Birth Score
     if (user1.dob && user2.dob) {
         const ageDifference = calculateAgeDifference(user1.dob, user2.dob);
         dobScore = Math.max(1 - ageDifference / maxAgeDifference, 0) * 0.27;
         activeWeights += 0.27;
     }
 
-    // Height Score
     if (user1.height != null && user2.height != null) {
         const heightDifference = Math.abs(user1.height - user2.height);
         heightScore =
@@ -39,7 +37,6 @@ function calculateSimilarity(user1: User, user2: User): number {
         activeWeights += 0.23;
     }
 
-    // Weight Score
     if (user1.weight != null && user2.weight != null) {
         const weightDifference = Math.abs(user1.weight - user2.weight);
         weightScore =
@@ -47,7 +44,6 @@ function calculateSimilarity(user1: User, user2: User): number {
         activeWeights += 0.25;
     }
 
-    // Budget Score
     if (user1.budget != null && user2.budget != null) {
         const budgetDifference = Math.abs(user1.budget - user2.budget);
         budgetScore =
@@ -56,10 +52,8 @@ function calculateSimilarity(user1: User, user2: User): number {
         activeWeights += 0.25;
     }
 
-    // Calculating the total score
     let totalScore = dobScore + heightScore + weightScore + budgetScore;
 
-    // Normalizing the total score to a 0-100 scale
     return activeWeights > 0 ? (totalScore / activeWeights) * 100 : 0;
 }
 

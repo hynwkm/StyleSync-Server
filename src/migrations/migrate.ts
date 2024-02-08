@@ -31,7 +31,7 @@ export async function up(knex: Knex): Promise<void> {
             table.string("type").notNullable();
             table.string("color").notNullable();
             table.float("rating");
-            table.decimal("price", 10, 2); // Assuming a maximum of 10 digits with 2 decimal places
+            table.decimal("price", 10, 2);
             table.string("purchase_link");
             table.string("image_url");
             table.string("style");
